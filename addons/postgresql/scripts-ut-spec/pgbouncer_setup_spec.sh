@@ -54,7 +54,7 @@ Describe "PgBouncer Configuration and Startup Script Tests"
 
   Describe "build_pgbouncer_conf()"
     setup() {
-      POSTGRESQL_USERNAME="testuser"
+      POSTGRESQL_USERNAME="testuser1"
       POSTGRESQL_PASSWORD="testpassword"
       CURRENT_POD_IP="127.0.0.1"
     }
