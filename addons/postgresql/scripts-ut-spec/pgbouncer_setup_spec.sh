@@ -7,6 +7,7 @@ if ! validate_shell_type_and_version "bash" 4 &>/dev/null; then
   exit 0
 fi
 
+
 source ./utils.sh
 
 # The unit test needs to rely on the common library functions defined in kblib.
