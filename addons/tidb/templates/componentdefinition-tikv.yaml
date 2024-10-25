@@ -9,6 +9,18 @@ spec:
   description: a distributed transactional key-value database
   updateStrategy: BestEffortParallel
   vars:
+    - name: CLUSTER_NAMESPACE
+      valueFrom:
+        clusterVarRef:
+          namespace: Required
+    - name: DOMAIN
+      value: "$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}"
+    - name: TIKV_COMPONENT_NAME
+      valueFrom:
+        componentVarRef:
+          compDef: tikv-7
+          optional: false
+          componentName: Required
     - name: PD_HOST
       valueFrom:
         serviceVarRef:
@@ -21,7 +33,7 @@ spec:
           port:
             name: client
     - name: PD_ADDRESS
-      value: "$(PD_HOST).$(KB_NAMESPACE).svc{{ .Values.clusterDomain }}:$(PD_PORT)"
+      value: "$(PD_HOST).$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}:$(PD_PORT)"
     - name: TIKV_HEADLESS_SVC_HOST
       valueFrom:
         serviceVarRef:
@@ -31,11 +43,17 @@ spec:
           optional: true
           host: Required
     - name: TIKV_HEADLESS_SVC_ADDRESS
-      value: "$(TIKV_HEADLESS_SVC_HOST).$(KB_NAMESPACE).svc{{ .Values.clusterDomain }}:20160"
+      value: "$(TIKV_HEADLESS_SVC_HOST).$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}:20160"
   runtime:
     containers:
       - name: tikv
         imagePullPolicy: IfNotPresent
+        env:
+          - name: CURRENT_POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
         ports:
           - containerPort: 20160
             name: peer
@@ -51,11 +69,10 @@ spec:
           - -c
           - |
             echo "start tikv..."
-            DOMAIN=$KB_NAMESPACE".svc{{ .Values.clusterDomain }}"
             exec /tikv-server --pd=http://${PD_ADDRESS} \
             --data-dir=/var/lib/tikv \
             --addr=0.0.0.0:20160 \
-            --advertise-addr=${KB_POD_FQDN}{{ .Values.clusterDomain }}:20160 \
+            --advertise-addr=${CURRENT_POD_NAME}.${TIKV_COMPONENT_NAME}-headless.${DOMAIN}:20160 \
             --status-addr=0.0.0.0:20180 \
             --config=/etc/tikv/tikv.toml
   volumes:
@@ -70,7 +87,6 @@ spec:
   lifecycleActions:
     memberLeave:
       exec:
-        image: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
         command:
           - bash
           - -c

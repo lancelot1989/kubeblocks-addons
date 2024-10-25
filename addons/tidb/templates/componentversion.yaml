@@ -10,14 +10,20 @@ spec:
       serviceVersion: "7.5.2"
       images:
         pd: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.5.2
+        roleProbe: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.5.2
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.5.2
     - name: "7.1.5"
       serviceVersion: "7.1.5"
       images:
         pd: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.1.5
+        roleProbe: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.1.5
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.1.5
     - name: "6.5.10"
       serviceVersion: "6.5.10"
       images:
         pd: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v6.5.10
+        roleProbe: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v6.5.10
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v6.5.10
   compatibilityRules:
     - compDefs:
         - "tidb-pd-7"
@@ -71,14 +77,17 @@ spec:
       serviceVersion: "7.5.2"
       images:
         tikv: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.tikv.repository }}:v7.5.2
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.5.2
     - name: "7.1.5"
       serviceVersion: "7.1.5"
       images:
         tikv: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.tikv.repository }}:v7.1.5
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v7.1.5
     - name: "6.5.10"
       serviceVersion: "6.5.10"
       images:
         tikv: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.tikv.repository }}:v6.5.10
+        memberLeave: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:v6.5.10
   compatibilityRules:
     - compDefs:
         - "tikv-7"

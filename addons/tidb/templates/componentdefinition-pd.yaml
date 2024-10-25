@@ -9,12 +9,41 @@ spec:
   description: tidb's metadata server
   updateStrategy: BestEffortParallel
   vars:
+    - name: CLUSTER_NAMESPACE
+      valueFrom:
+        clusterVarRef:
+          namespace: Required
     - name: DOMAIN
-      value: "$(KB_NAMESPACE).svc{{ .Values.clusterDomain }}"
+      value: "$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}"
+    - name: PD_COMPONENT_NAME
+      valueFrom:
+        componentVarRef:
+          compDef: tidb-pd-7
+          optional: false
+          componentName: Required
+    - name: PD_POD_NAME_LIST   
+      valueFrom:
+        componentVarRef:
+          compDef: tidb-pd-7
+          optional: false
+          podNames: Required
+    - name: PD_LEADER_POD_NAME
+      valueFrom:
+        componentVarRef:
+          optional: true
+          podNamesForRole:
+            role: leader
+            option: Optional
   runtime:
     containers:
       - name: pd
         imagePullPolicy: IfNotPresent
+        env:
+          - name: CURRENT_POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
         ports:
           - containerPort: 2379
             name: client
@@ -54,7 +83,6 @@ spec:
   lifecycleActions:
     roleProbe:
       exec:
-        image: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
         command:
           - bash
           - -c
@@ -70,12 +98,10 @@ spec:
             fi
     memberLeave:
       exec:
-        # FIXME: seems like image is not needed
-        # this action will be executed in lorry container
-        image: {{ .Values.image.registry | default "docker.io" }}/{{ .Values.image.pd.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
         command:
           - bash
           - -c
+          # FIXME: remove KB_MEMBER_ADDRESSES
           - |
             ADDRESS=${KB_MEMBER_ADDRESSES%%,*}
             echo $KB_LEAVE_MEMBER_POD_NAME
