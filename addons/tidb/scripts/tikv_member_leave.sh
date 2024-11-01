@@ -2,7 +2,8 @@
 
 set -exo pipefail
 
-TIKV_ADDRESS="${KB_LEAVE_MEMBER_POD_NAME}.${TIKV_HEADLESS_SVC_ADDRESS}"
+TIKV_POD_FQDNs=$(echo "${TIKV_POD_FQDN_LIST}" | tr ',' '\n')
+TIKV_ADDRESS=$(echo "$TIKV_POD_FQDNs" | grep "$CURRENT_POD_NAME")
 echo "$TIKV_ADDRESS"
 /pd-ctl -u "$PD_ADDRESS" store delete addr "$TIKV_ADDRESS"
 

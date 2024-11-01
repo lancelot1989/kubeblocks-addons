@@ -1,7 +1,7 @@
 apiVersion: apps.kubeblocks.io/v1
 kind: ComponentDefinition
 metadata:
-  name: tidb-7
+  name: {{ include "tidb.tidb7.compDefName" . }}
   labels:
     {{- include "tidb.labels" . | nindent 4 }}
 spec:
@@ -19,18 +19,17 @@ spec:
     - name: TIDB_COMPONENT_NAME
       valueFrom:
         componentVarRef:
-          compDef: tidb-7
           optional: false
           componentName: Required
     - name: PD_HOST
       valueFrom:
         serviceVarRef:
-          compDef: tidb-pd-7
+          compDef: {{ include "tidb.pd7.compDefName" . }}
           host: Required
     - name: PD_PORT
       valueFrom:
         serviceVarRef:
-          compDef: tidb-pd-7
+          compDef: {{ include "tidb.pd7.compDefName" . }}
           port:
             name: client
     - name: PD_ADDRESS
