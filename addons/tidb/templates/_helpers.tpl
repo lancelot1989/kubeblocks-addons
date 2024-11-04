@@ -39,6 +39,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+These annotations ensure that resources from previous version won't be cleaned by helm during an upgrade.
+*/}}
+{{- define "tidb.multiVersionAnnotation" -}}
+helm.sh/resource-policy: keep
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "tidb.labels" -}}

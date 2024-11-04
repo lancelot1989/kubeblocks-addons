@@ -2,6 +2,8 @@ apiVersion: apps.kubeblocks.io/v1
 kind: ComponentDefinition
 metadata:
   name: {{ include "tidb.pd7.compDefName" . }}
+  annotations:
+    {{- include "tidb.multiVersionAnnotation" . | nindent 4}}
   labels:
     {{- include "tidb.labels" . | nindent 4 }}
 spec:
@@ -91,9 +93,9 @@ spec:
           - -c
           - |
             # FIXME: this will fail, no idea why
-            # LEADER_NAME=$(/pd-ctl member | jq -r '.leader.name')
-            MEMBER=$(/pd-ctl member)
-            LEADER_NAME=$(echo $MEMBER | jq -r .leader.name)
+            LEADER_NAME=$(/pd-ctl member | jq -r '.leader.name')
+            # MEMBER=$(/pd-ctl member)
+            # LEADER_NAME=$(echo $MEMBER | jq -r .leader.name)
             if [ "$LEADER_NAME" == "$HOSTNAME" ]; then
                 echo "leader"
             else

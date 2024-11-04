@@ -10,7 +10,7 @@ spec:
       default: true
       components:
         - name: tidb-pd
-          compDef: {{ include "tidb.pd7.compDefName" . }}
+          compDef: {{ include "tidb.pd7.componentDefNamePrefix" . }}
         - name: tikv
           compDef: {{ include "tidb.tikv7.componentDefNamePrefix" . }}
         - name: tidb

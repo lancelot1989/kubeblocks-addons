@@ -2,6 +2,8 @@ apiVersion: apps.kubeblocks.io/v1
 kind: ComponentDefinition
 metadata:
   name: {{ include "tidb.tidb7.compDefName" . }}
+  annotations:
+    {{- include "tidb.multiVersionAnnotation" . | nindent 4}}
   labels:
     {{- include "tidb.labels" . | nindent 4 }}
 spec:

@@ -2,6 +2,8 @@ apiVersion: apps.kubeblocks.io/v1
 kind: ComponentDefinition
 metadata:
   name: {{ include "tidb.tikv7.compDefName" . }}
+  annotations:
+    {{- include "tidb.multiVersionAnnotation" . | nindent 4}}
   labels:
     {{- include "tidb.labels" . | nindent 4 }}
 spec:
@@ -33,11 +35,6 @@ spec:
             name: client
     - name: PD_ADDRESS
       value: "$(PD_HOST).$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}:$(PD_PORT)"
-    - name: TIKV_POD_FQDN_LIST
-      valueFrom:
-        componentVarRef:
-          optional: false
-          podFQDNs: Required
   runtime:
     containers:
       - name: tikv
