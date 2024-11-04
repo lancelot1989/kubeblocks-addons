@@ -11,22 +11,6 @@ spec:
   description: tidb's metadata server
   updateStrategy: BestEffortParallel
   vars:
-    - name: CLUSTER_NAMESPACE
-      valueFrom:
-        clusterVarRef:
-          namespace: Required
-    - name: DOMAIN
-      value: "$(CLUSTER_NAMESPACE).svc{{ .Values.clusterDomain }}"
-    - name: PD_COMPONENT_NAME
-      valueFrom:
-        componentVarRef:
-          optional: false
-          componentName: Required
-    - name: PD_POD_NAME_LIST   
-      valueFrom:
-        componentVarRef:
-          optional: false
-          podNames: Required
     - name: PD_LEADER_POD_NAME
       valueFrom:
         componentVarRef:
@@ -34,7 +18,7 @@ spec:
           podNamesForRole:
             role: leader
             option: Optional
-    - name: TIDB_POD_FQDN_LIST
+    - name: PD_POD_FQDN_LIST
       valueFrom:
         componentVarRef:
           optional: false
@@ -92,10 +76,7 @@ spec:
           - bash
           - -c
           - |
-            # FIXME: this will fail, no idea why
             LEADER_NAME=$(/pd-ctl member | jq -r '.leader.name')
-            # MEMBER=$(/pd-ctl member)
-            # LEADER_NAME=$(echo $MEMBER | jq -r .leader.name)
             if [ "$LEADER_NAME" == "$HOSTNAME" ]; then
                 echo "leader"
             else
@@ -107,7 +88,7 @@ spec:
           - bash
           - -c
           - |
-            ADDRESS=${TIDB_POD_FQDN_LIST%%,*}
+            ADDRESS=${PD_POD_FQDN_LIST%%,*}
             echo $KB_LEAVE_MEMBER_POD_NAME
             echo $ADDRESS
             /pd-ctl -u $ADDRESS member delete name $KB_LEAVE_MEMBER_POD_NAME
