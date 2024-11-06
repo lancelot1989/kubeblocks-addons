@@ -11,11 +11,16 @@ spec:
   # - `WipeOut`: An aggressive policy that deletes all Cluster resources, including volume snapshots and backus in external storage. This results in complete data removal and should be used cautiously, primarily in non-production environments to avoid irreversible data loss.
   terminationPolicy: Delete
   # Specifies the name of the ClusterDefinition to use when creating a Cluster.
+  # Note: DO NOT UPDATE THIS FIELD
+  # The value must be `postgresql` to create a PostgreSQL Cluster
   clusterDef: postgresql
+  # Specifies the name of the ClusterTopology to be used when creating the
+  # Cluster.
+  # Valid options are: [replication]
+  topology: replication
   # Specifies a list of ClusterComponentSpec objects used to define the
   # individual Components that make up a Cluster.
-  # This field allows for detailed configuration of each Component within the
-  # Cluster
+  # This field allows for detailed configuration of each Component within the Cluster
   componentSpecs:
     - name: postgresql
       # ServiceVersion specifies the version of the Service expected to be
@@ -25,7 +30,7 @@ spec:
       # Determines whether metrics exporter information is annotated on the
       # Component's headless Service.
       # Valid options are [true, false]
-      disableExporter: false
+      disableExporter: true
       # Specifies Labels to override or add for underlying Pods, PVCs, Account & TLS
       # Secrets, Services Owned by Component.
       labels:
@@ -35,29 +40,36 @@ spec:
         # that Patroni will use to tag Kubernetes resources.
         # This helps Patroni identify which resources belong to the specified scope (or cluster).
         #
-        # Note: DO NOT REMOVE THIS LABEL and update the value w.r.t your cluster name
-        # the value must follow the format <cluster.metadata.name>-<componentSpecs[].name>
-        # which is pg-cluster-postgresql here in this examples
+        # Note: DO NOT REMOVE THIS LABEL
+        # update the value w.r.t your cluster name
+        # the value must follow the format <cluster.metadata.name>-postgresql
+        # which is pg-cluster-postgresql in this examples
+        # replace `pg-cluster` with your cluster name
         apps.kubeblocks.postgres.patroni/scope: pg-cluster-postgresql
-      # set `replicas` to 2 to create a replication cluster.
-      replicas: 1
+      # Update `replicas` to your need.
+      replicas: 2
+      # Specifies the resources required by the Component.
       resources:
         limits:
-          cpu: "0.5"  # Maximum CPU limit for the container
-          memory: "0.5Gi"  # Maximum memory limit for the container
+          cpu: "0.5"
+          memory: "0.5Gi"
         requests:
-          cpu: "0.5"  # Minimum CPU requested for the container
-          memory: "0.5Gi"  # Minimum memory requested for the container
+          cpu: "0.5"
+          memory: "0.5Gi"
+      # Specifies a list of PersistentVolumeClaim templates that define the storage
+      # requirements for the Component.
       volumeClaimTemplates:
+        # Refers to the name of a volumeMount defined in
+        # `componentDefinition.spec.runtime.containers[*].volumeMounts
         - name: data
           spec:
             # The name of the StorageClass required by the claim.
             # If not specified, the StorageClass annotated with
-            # 'storageclass.kubernetes.io/is-default-class-true' will be used by default
+            # `storageclass.kubernetes.io/is-default-class=true` will be used by default
             storageClassName: ""
             accessModes:
               - ReadWriteOnce
             resources:
               requests:
-                # Specify the storage size as needed
+                # Set the storage size as needed
                 storage: 20Gi
